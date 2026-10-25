@@ -1,35 +1,45 @@
-# SYSTEM — v0.1.0
+# SYSTEM
 
-PWA responsiva para Android, em português, inspirada em interfaces sci-fi de RPG. Sem conta: os dados são guardados localmente no navegador.
+PWA responsiva para Android, em português, com progressão pessoal inspirada em RPG.
 
-## Funcionalidades
+## Funcionalidades atuais
 - Criar, concluir, reabrir e excluir missões.
-- Categorias: estudos, dinheiro, treino, hábitos e objetivos.
+- Categorias de estudo, dinheiro, treino, hábitos e objetivos.
 - Recompensas base: fácil 10 XP, média 25 XP, difícil 50 XP, extrema 100 XP.
-- XP, níveis, ranks, atributos e histórico local.
-- Planejador heurístico local (não é IA generativa).
+- XP, níveis, ranks, atributos e histórico armazenados localmente.
+- Planejador local baseado em regras (não é IA generativa).
 - Exportar e importar backup JSON.
-- IndexedDB com fallback para localStorage.
-- Manifesto e service worker para PWA e cache básico.
+- IndexedDB com alternativa via localStorage.
+- Cadastro, login, perfil e sistema social com Supabase.
+- PWA com manifesto e service worker.
+
+## Dados e sincronização
+O progresso detalhado (missões, histórico, XP e atributos) ainda é local ao navegador/aparelho. O Supabase é usado para contas, perfil social e amizades; entrar na conta não sincroniza automaticamente o progresso entre aparelhos. Não limpe os dados do site para tentar corrigir problemas. Exporte um backup JSON antes de operações de manutenção.
+
+## Banco Supabase
+Os arquivos SQL do projeto ficam em `supabase/`:
+1. `schema.sql`: tabelas e políticas básicas de perfil e amizades.
+2. `friends.sql`: funções seguras para busca e operações sociais.
+
+Se as tabelas já existem, faça backup e revise o SQL antes de executar novamente. O esquema é idempotente para as tabelas e políticas descritas, mas não substitui um backup do banco.
 
 ## Publicar pelo celular
-1. Envie os arquivos da raiz deste repositório para GitHub.
-2. No Cloudflare Dashboard, abra Workers & Pages → Create → Pages → Connect to Git.
-3. Selecione este repositório e a branch `main`.
-4. Use preset `None`, sem build command e diretório de saída `/` ou `.` conforme a interface.
-5. Após o deploy, abra a URL HTTPS no Chrome Android e escolha Instalar app/Adicionar à tela inicial.
+1. Conecte o repositório `middes0/SYSTEM` ao Cloudflare Pages.
+2. Use a branch `main`, sem comando de build, e diretório de saída `/` ou `.` conforme a interface.
+3. Aguarde o deploy terminar antes de testar a URL HTTPS.
+4. No Android, abra a URL no Chrome e use Instalar app/Adicionar à tela inicial.
 
 ## Teste manual recomendado
-1. Criar uma missão, concluí-la e conferir o XP.
-2. Recarregar a página e confirmar que os dados persistem.
-3. Testar filtros, exportação e importação do backup.
-4. Visitar uma vez online e testar a abertura offline.
+1. Criar uma missão e conferir XP/atributos após concluir.
+2. Recarregar o site e confirmar que o progresso permanece.
+3. Excluir uma missão padrão, recarregar e confirmar que ela não reaparece.
+4. Abrir o site várias vezes e confirmar que não são criados eventos artificiais no histórico.
+5. Testar exportação e importação de backup.
+6. Testar cadastro/login e operações de amizade com duas contas de teste.
+7. Confirmar que o deploy publicado corresponde ao último commit.
 
-## Limitações
-- Ainda não existe IA generativa externa nem adaptação baseada em um modelo de linguagem; o planejador local usa regras simples.
-- Os dados não sincronizam entre navegadores ou aparelhos. Limpar os dados do site pode apagar o progresso; exporte backups.
-- O service worker faz cache dos arquivos principais; não garante todas as funcionalidades offline em todos os navegadores.
-- A interface precisa ser validada num dispositivo Android real antes de considerar o lançamento testado.
-
-## Próxima etapa: IA segura
-Adicionar uma Cloudflare Pages Function em `functions/api/plan.js`, com chave guardada como secret no Cloudflare. Nunca incluir chaves no frontend público. Validar e limitar requisições, e manter XP e progressão sob controle do núcleo local. Confirmar disponibilidade e cotas gratuitas do provedor antes de escolher o modelo.
+## Limitações conhecidas
+- A progressão local ainda não sincroniza entre aparelhos.
+- O planejador não usa IA generativa.
+- A abertura offline depende do cache e das limitações do navegador.
+- Testes estáticos não substituem a validação em um Android real.
