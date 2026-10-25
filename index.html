@@ -68,6 +68,7 @@
 <div class="friends-divider"></div><p class="eyebrow">MINHA LISTA</p><div id="friendList" class="friend-list"><p class="friend-empty">Suas amizades aparecerão aqui.</p></div>
 <p id="friendStatus" class="account-status" role="status" aria-live="polite"></p>
 </section>
+</section>
 <nav class="tabs" aria-label="Navegação principal"><button class="tab active" data-tab="home">⌂ Início</button><button class="tab" data-tab="missions">▤ Missões</button><button class="tab" data-tab="status">◇ Status</button><button class="tab" data-tab="social">♧ Social</button><button class="tab" data-tab="profile">◎ Perfil</button></nav>
 <section id="missionsView" class="view" hidden>
 <div class="section-heading"><div><p class="eyebrow">OBJETIVOS ATIVOS</p><h2>Missões do sistema</h2></div><button id="openMission" class="primary compact">＋ Nova missão</button></div>
@@ -83,9 +84,10 @@
 </section>
 <section id="statusView" class="view" hidden><div class="section-heading"><div><p class="eyebrow">ATRIBUTOS DO JOGADOR</p><h2>Status</h2></div></div><div id="attributes" class="attribute-list panel"></div><div class="panel history-panel"><h3>Registro recente</h3><div id="historyList"></div></div><div class="actions"><button id="exportBtn" class="secondary">Exportar backup JSON</button><label class="secondary import-label">Importar backup<input id="importInput" type="file" accept="application/json" hidden></label><button id="resetBtn" class="danger">Apagar meus dados</button></div></section>
 <section id="plannerView" class="view" hidden><div class="section-heading"><div><p class="eyebrow">ADMINISTRADOR DO SISTEMA</p><h2>Planejar objetivo</h2></div></div><div class="panel planner-panel"><div class="ai-tag"><span class="pulse"></span> MODO LOCAL · BETA</div><p class="muted">Descreva um objetivo. O planejador local sugere missões com base em regras simples; a IA generativa será integrada em uma etapa futura.</p><label for="goalInput">Qual objetivo você quer alcançar?</label><textarea id="goalInput" rows="3" maxlength="500" placeholder="Ex.: Quero me preparar para uma prova em 5 dias"></textarea><button id="planBtn" class="primary full">Gerar plano de missões</button><div id="planResults"></div></div><div class="note">O sistema ajusta sugestões usando seu histórico local. Ele não substitui orientação profissional nem concede XP por tarefas que não foram concluídas.</div></section>
-</section>
 <footer><span>SYSTEM <span class="muted">v0.1.0</span></span><span class="footer-status"><span class="pulse"></span> CONTA ONLINE · MISSÕES LOCAIS</span></footer>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="./app.js" defer></script>\n<script type="module" src="./auth-ui.js"></script>\n<script type="module" src="./friends-ui.js"></script>
+<script src="./app.js" defer></script>
+<script type="module" src="./auth-ui.js"></script>
+<script type="module" src="./friends-ui.js"></script>
 </body></html>
