@@ -10,12 +10,32 @@
 <div class="scanlines" aria-hidden="true"></div>
 <header class="topbar"><a class="brand" href="#" aria-label="SYSTEM início"><span class="brand-mark">S</span><span>SYSTEM<span class="brand-sub">PERSONAL EVOLUTION</span></span></a><button id="installBtn" class="icon-button" hidden aria-label="Instalar aplicativo">⇩</button></header>
 <main class="shell">
+<div id="homeView" class="view home-view">
 <section class="hero panel">
 <div class="eyebrow"><span class="pulse"></span> SISTEMA ONLINE <span id="todayLabel"></span></div>
 <div class="hero-row"><div><p class="muted small">JOGADOR / DESPERTADO</p><h1 id="playerName">NOVO DESPERTAR</h1><p class="muted">Classe <strong id="playerRank">E</strong> <span class="dot">•</span> Nível <strong id="levelText">01</strong></p></div><div class="level-orb"><span>LVL</span><strong id="levelOrb">01</strong></div></div>
 <div class="xp-meta"><span>EXPERIÊNCIA</span><span id="xpText">0 / 100 XP</span></div><div class="xp-track"><div id="xpBar"></div></div>
 <div class="stat-grid"><div class="stat"><span>MISSÕES</span><strong id="completedText">0</strong><small>concluídas</small></div><div class="stat"><span>SEQUÊNCIA</span><strong id="streakText">0</strong><small>dias ativos</small></div><div class="stat"><span>XP TOTAL</span><strong id="totalXpText">0</strong><small>acumulado</small></div></div>
 </section>
+<section class="dashboard-section">
+  <div class="section-heading"><div><p class="eyebrow">PRÓXIMA AÇÃO</p><h2>Missão em destaque</h2></div><button class="secondary compact" data-go="missions">Ver todas ↗</button></div>
+  <div id="homeMission" class="panel home-mission"><p class="muted">Carregando missão…</p></div>
+</section>
+<section class="dashboard-section">
+  <div class="section-heading"><div><p class="eyebrow">DESENVOLVIMENTO</p><h2>Atributos</h2></div><button class="secondary compact" data-go="status">Ver status ↗</button></div>
+  <div id="homeAttributes" class="panel home-attributes"></div>
+</section>
+<section class="dashboard-section">
+  <div class="section-heading"><div><p class="eyebrow">REGISTROS</p><h2>Atividade recente</h2></div><button class="secondary compact" data-go="status">Histórico ↗</button></div>
+  <div id="homeHistory" class="panel home-history"></div>
+</section>
+<section class="dashboard-section social-summary">
+  <div class="section-heading"><div><p class="eyebrow">REDE DE JOGADORES</p><h2>Social</h2></div><button class="secondary compact" data-go="social">Abrir social ↗</button></div>
+  <div class="panel home-social"><div><strong>Jogue sua evolução em comunidade</strong><p class="muted">Pesquise jogadores, gerencie solicitações e acompanhe amigos.</p></div><button class="primary compact" data-go="social">Encontrar amigos</button></div>
+</section>
+</div>
+<section id="profileView" class="view page-view" hidden>
+<div class="section-heading"><div><p class="eyebrow">IDENTIDADE DO JOGADOR</p><h2>Perfil e conta</h2></div></div>
 <section id="accountPanel" class="panel account-panel" aria-labelledby="accountTitle">
 <div class="account-head"><div><p class="eyebrow">IDENTIDADE ONLINE</p><h2 id="accountTitle">Entrar no SYSTEM</h2></div><span class="account-mark">ID</span></div>
 <p class="muted account-intro">Crie uma conta para preparar seu perfil online. Suas missões locais continuam neste aparelho.</p>
@@ -45,7 +65,10 @@
 <div class="friends-divider"></div><p class="eyebrow">MINHA LISTA</p><div id="friendList" class="friend-list"><p class="friend-empty">Suas amizades aparecerão aqui.</p></div>
 <p id="friendStatus" class="account-status" role="status" aria-live="polite"></p>
 </section>
-<nav class="tabs" aria-label="Navegação"><button class="tab active" data-tab="missions">▤ Missões</button><button class="tab" data-tab="status">◇ Status</button><button class="tab" data-tab="planner">✧ Administrador</button></nav>
+</section>
+<section id="socialView" class="view page-view" hidden>
+<div class="section-heading"><div><p class="eyebrow">COMUNIDADE</p><h2>Amigos e jogadores</h2></div></div>
+<nav class="tabs" aria-label="Navegação principal"><button class="tab active" data-tab="home">⌂ Início</button><button class="tab" data-tab="missions">▤ Missões</button><button class="tab" data-tab="status">◇ Status</button><button class="tab" data-tab="social">♧ Social</button><button class="tab" data-tab="profile">◎ Perfil</button></nav>
 <section id="missionsView" class="view">
 <div class="section-heading"><div><p class="eyebrow">OBJETIVOS ATIVOS</p><h2>Missões do sistema</h2></div><button id="openMission" class="primary compact">＋ Nova missão</button></div>
 <div class="filters"><button class="filter active" data-filter="all">Todas</button><button class="filter" data-filter="pending">Pendentes</button><button class="filter" data-filter="done">Concluídas</button></div>
@@ -60,6 +83,7 @@
 </section>
 <section id="statusView" class="view" hidden><div class="section-heading"><div><p class="eyebrow">ATRIBUTOS DO JOGADOR</p><h2>Status</h2></div></div><div id="attributes" class="attribute-list panel"></div><div class="panel history-panel"><h3>Registro recente</h3><div id="historyList"></div></div><div class="actions"><button id="exportBtn" class="secondary">Exportar backup JSON</button><label class="secondary import-label">Importar backup<input id="importInput" type="file" accept="application/json" hidden></label><button id="resetBtn" class="danger">Apagar meus dados</button></div></section>
 <section id="plannerView" class="view" hidden><div class="section-heading"><div><p class="eyebrow">ADMINISTRADOR DO SISTEMA</p><h2>Planejar objetivo</h2></div></div><div class="panel planner-panel"><div class="ai-tag"><span class="pulse"></span> MODO LOCAL · BETA</div><p class="muted">Descreva um objetivo. O planejador local sugere missões com base em regras simples; a IA generativa será integrada em uma etapa futura.</p><label for="goalInput">Qual objetivo você quer alcançar?</label><textarea id="goalInput" rows="3" maxlength="500" placeholder="Ex.: Quero me preparar para uma prova em 5 dias"></textarea><button id="planBtn" class="primary full">Gerar plano de missões</button><div id="planResults"></div></div><div class="note">O sistema ajusta sugestões usando seu histórico local. Ele não substitui orientação profissional nem concede XP por tarefas que não foram concluídas.</div></section>
+</section>
 <footer><span>SYSTEM <span class="muted">v0.1.0</span></span><span class="footer-status"><span class="pulse"></span> CONTA ONLINE · MISSÕES LOCAIS</span></footer>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
