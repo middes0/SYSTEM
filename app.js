@@ -27,11 +27,70 @@ function completeMission(mid){const m=state.missions.find(x=>x.id===mid);if(!m)r
 function reopenMission(mid){const m=state.missions.find(x=>x.id===mid);if(!m||!m.done)return;if(!confirm('Reabrir esta missão? O XP já recebido será mantido no histórico e não será descontado.'))return;m.done=false;m.doneAt=null;record('Missão reaberta',m.title);save();render();toast('Missão reaberta; XP anterior mantido.')}
 function deleteMission(mid){const m=state.missions.find(x=>x.id===mid);if(!m)return;if(!confirm('Excluir esta missão? O histórico de XP já recebido será mantido.'))return;state.missions=state.missions.filter(x=>x.id!==mid);record('Missão excluída',m.title);save();render();toast('Missão excluída.')}
 function switchTab(name){const views={home:$('#homeView'),missions:$('#missionsView'),status:$('#statusView'),social:$('#socialView'),profile:$('#profileView')};if(!Object.prototype.hasOwnProperty.call(views,name)||!views[name])return false;for(const [key,view] of Object.entries(views))view.hidden=key!==name;$('#plannerView').hidden=name!=='profile';$('.tabs').querySelectorAll('.tab[data-tab]').forEach(button=>{const active=button.dataset.tab===name;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});try{window.scrollTo({top:0,behavior:'smooth'})}catch(_){window.scrollTo(0,0)}return true}
-function planGoal(goal){const g=goal.toLowerCase();let suggestions;if(/prova|estud|mat[eé]ria|aprender/.test(g))suggestions=[['Listar os tópicos mais importantes','study','easy'],['Fazer um bloco de estudo de 25 minutos','study','medium'],['Resolver exercícios e revisar erros','study','hard']];else if(/trein|exerc[ií]cio|força|correr|sa[uú]de/.test(g))suggestions=[['Definir uma meta de treino realista','training','easy'],['Fazer uma sessão curta de treino','training','medium'],['Registrar como foi o treino e recuperar-se','habit','easy']];else if(/dinheiro|econom|guardar|renda|trabalh/.test(g))suggestions=[['Anotar gastos recentes','money','easy'],['Definir uma meta financeira pequena','money','medium'],['Pesquisar uma oportunidade de renda ou economia','goal','hard']];else suggestions=[['Escrever o resultado que quero alcançar','goal','easy'],['Dividir o objetivo em uma tarefa de 20 minutos','goal','medium'],['Executar a primeira tarefa e avaliar o resultado','habit','medium']];const recent=state.missions.slice(0,20).filter(m=>m.done).length;const pending=state.missions.filter(m=>!m.done).length;if(pending>=8)suggestions=suggestions.slice(0,2);if(recent<2)suggestions=suggestions.map(s=>[s[0],s[1],s[2]==='hard'?'medium':s[2]]);return suggestions}
+function planGoal(goal){
+ const g=goal.toLowerCase();
+ let templates;
+ if(/prova|estud|mat[eé]ria|aprender|curso|escola/.test(g))templates=[
+  ['Mapear os tópicos e separar o material','study','easy'],
+  ['Estudar um tópico sem distrações por 25 minutos','study','medium'],
+  ['Resolver 5 exercícios e anotar os erros','study','medium'],
+  ['Revisar os erros e testar o que aprendeu sem consultar','study','hard']
+ ];
+ else if(/trein|exerc[ií]cio|força|correr|sa[uú]de|condicionamento/.test(g))templates=[
+  ['Definir uma meta física realista para esta semana','goal','easy'],
+  ['Fazer uma sessão curta adaptada à sua condição','training','medium'],
+  ['Registrar o treino e como se sentiu','habit','easy'],
+  ['Revisar a evolução e ajustar a próxima sessão','goal','medium']
+ ];
+ else if(/dinheiro|econom|guardar|renda|trabalh|emprego|vender/.test(g))templates=[
+  ['Anotar dinheiro disponível e gastos essenciais','money','easy'],
+  ['Escolher uma meta financeira pequena e mensurável','goal','medium'],
+  ['Pesquisar uma oportunidade concreta de renda ou economia','money','medium'],
+  ['Executar uma ação: candidatura, anúncio ou contato','goal','hard']
+ ];
+ else if(/h[aá]bito|rotina|acordar|dormir|organiza|disciplina/.test(g))templates=[
+  ['Escolher um hábito pequeno e definir quando fazê-lo','habit','easy'],
+  ['Preparar o ambiente para facilitar o hábito','habit','easy'],
+  ['Praticar o hábito por 10 minutos e registrar','habit','medium'],
+  ['Revisar o que atrapalhou e ajustar a rotina','goal','medium']
+ ];
+ else templates=[
+  ['Definir como será o resultado concluído','goal','easy'],
+  ['Dividir o objetivo em uma ação de até 20 minutos','goal','medium'],
+  ['Executar a primeira ação e registrar o resultado','habit','medium'],
+  ['Revisar o progresso e escolher o próximo passo','goal','medium']
+ ];
+ const completed=state.missions.filter(m=>m.done).length;
+ const pending=state.missions.filter(m=>!m.done).length;
+ const total=state.missions.length;
+ const rate=total?completed/total:0;
+ // Ajusta a dificuldade à carga e ao histórico, sem penalizar quem está começando.
+ if(pending>=8)templates=templates.slice(0,2);
+ else if(pending>=5)templates=templates.slice(0,3);
+ if(completed<2||rate<0.25)templates=templates.map(s=>[s[0],s[1],s[2]==='hard'?'medium':s[2]]);
+ else if(rate>=0.75&&completed>=5)templates=templates.map(s=>[s[0],s[1],s[2]==='easy'?'medium':s[2]]);
+ const deadlineMatch=g.match(/(?:em|dentro de)\s+(\d{1,2})\s+dias?/);
+ const days=deadlineMatch?Math.max(1,Math.min(60,Number(deadlineMatch[1]))):null;
+ const today=new Date();
+ const dateFor=offset=>{const d=new Date(today);d.setDate(d.getDate()+offset);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ return templates.map((s,i)=>({...{title:s[0],category:s[1],difficulty:s[2]},due:days?dateFor(Math.min(days,Math.max(0,Math.ceil((i+1)*days/templates.length)-1))):''}));
+}
 $('#missionForm').addEventListener('submit',e=>{e.preventDefault();try{addMission($('#missionTitle').value,$('#missionCategory').value,$('#missionDifficulty').value,$('#missionDue').value,{durationMinutes:$('#missionDuration').value});e.target.reset();$('#durationWrap').hidden=$('#missionCategory').value!=='training';e.target.hidden=true;toast('Missão adicionada.')}catch(err){toast(err.message)}});$('#missionCategory').addEventListener('change',()=>{$('#durationWrap').hidden=$('#missionCategory').value!=='training'});function showForm(){$('#missionForm').hidden=false;$('#missionTitle').focus()}$('#openMission').addEventListener('click',showForm);$('#emptyAdd').addEventListener('click',showForm);$('#closeMission').addEventListener('click',()=>$('#missionForm').hidden=true);
 $('#missionList').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;if(b.dataset.action==='toggle'){const m=state.missions.find(x=>x.id===b.dataset.id);if(m?.done)reopenMission(b.dataset.id);else completeMission(b.dataset.id)}if(b.dataset.action==='delete')deleteMission(b.dataset.id)});$$('.preset').forEach(b=>b.addEventListener('click',()=>{const presets={walk:['Caminhada rápida por 10 minutos',10,'medium'],stretch:['Alongamento por 5 minutos',5,'easy'],squats:['Agachamentos — 10 repetições',2,'easy'],pushups:['Flexões — 5 repetições',2,'easy'],core:['Abdominais — 10 repetições',2,'easy'],workout:['Treino físico livre por 20 minutos',20,'hard']};const p=presets[b.dataset.workout];if(!p)return;addMission(p[0],'training',p[2],'',{durationMinutes:p[1],source:'workout-template'});toast('Missão física adicionada.')}));
 $$('.filter').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;$$('.filter').forEach(x=>x.classList.toggle('active',x===b));renderMissions()}));document.querySelector('.tabs')?.addEventListener('click',event=>{const button=event.target.closest('button.tab[data-tab]');if(!button||!event.currentTarget.contains(button))return;event.preventDefault();switchTab(button.dataset.tab)});document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go){switchTab(go.dataset.go);return}const hm=e.target.closest('[data-home-mission]');if(hm){switchTab('missions');const m=state.missions.find(x=>x.id===hm.dataset.homeMission);if(m)completeMission(m.id)}});
-$('#planBtn').addEventListener('click',()=>{const goal=$('#goalInput').value.trim();if(goal.length<8){toast('Descreva o objetivo com um pouco mais de detalhe.');return}const items=planGoal(goal);$('#planResults').innerHTML='<h3 style="margin-top:18px">Sugestões de missão</h3>'+items.map((s,i)=>'<div class="plan-result"><span>'+esc(s[0])+'<br><small class="muted">'+esc(CATS[s[1]])+' · '+esc(DIFF[s[2]])+' · +'+XP[s[2]]+' XP</small></span><button data-plan="'+i+'">Adicionar</button></div>').join('');$('#planResults').dataset.items=JSON.stringify(items)});$('#planResults').addEventListener('click',e=>{const b=e.target.closest('button[data-plan]');if(!b)return;const items=JSON.parse($('#planResults').dataset.items||'[]');const s=items[Number(b.dataset.plan)];if(!s)return;try{addMission(s[0],s[1],s[2],'',{source:'planner'});b.textContent='Adicionada';b.disabled=true;toast('Sugestão adicionada às missões.')}catch(err){toast(err.message)}});
+$('#planBtn').addEventListener('click',()=>{
+ const goal=$('#goalInput').value.trim();
+ if(goal.length<8){toast('Descreva o objetivo com um pouco mais de detalhe.');return}
+ const items=planGoal(goal);
+ $('#planResults').innerHTML='<h3 style="margin-top:18px">Plano adaptado ao seu progresso</h3><p class="muted small">'+(state.missions.filter(m=>!m.done).length>=5?'Você já tem várias missões pendentes; o plano foi reduzido para não sobrecarregar.':'O plano considera o tema, seu histórico e a quantidade de missões pendentes.')+'</p>'+items.map((s,i)=>'<div class="plan-result"><span>'+esc(s.title)+'<br><small class="muted">'+esc(CATS[s.category])+' · '+esc(DIFF[s.difficulty])+' · +'+XP[s.difficulty]+' XP'+(s.due?' · Prazo: '+esc(new Date(s.due+'T12:00:00').toLocaleDateString('pt-BR')):'')+'</small></span><button data-plan="'+i+'">Adicionar</button></div>').join('');
+ $('#planResults').dataset.items=JSON.stringify(items);
+});
+$('#planResults').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-plan]');if(!b)return;
+ const items=JSON.parse($('#planResults').dataset.items||'[]');
+ const s=items[Number(b.dataset.plan)];if(!s)return;
+ try{addMission(s.title,s.category,s.difficulty,s.due,{source:'planner'});b.textContent='Adicionada';b.disabled=true;toast('Missão adicionada com prazo.')}catch(err){toast(err.message)}
+});
 $('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='system-backup-'+dayKey()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup exportado.')});
 $('#importInput').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());if(!validState(parsed))throw Error('Formato de backup inválido.');if(!confirm('Importar este backup substituirá os dados atuais. Continuar?'))return;state=normalize(parsed);await save();render();toast('Backup importado.')}catch(err){toast(err.message||'Não foi possível importar o backup.')}finally{e.target.value=''}});
 $('#resetBtn').addEventListener('click',async()=>{if(!confirm('Apagar todas as missões, XP e histórico deste aparelho? Exporte um backup antes, se precisar.'))return;state=fresh();await save();render();toast('Dados locais redefinidos.')});
