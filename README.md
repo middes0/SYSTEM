@@ -43,3 +43,8 @@ Se as tabelas já existem, faça backup e revise o SQL antes de executar novamen
 - O planejador não usa IA generativa.
 - A abertura offline depende do cache e das limitações do navegador.
 - Testes estáticos não substituem a validação em um Android real.
+
+
+## Progresso na nuvem (opcional)
+
+A sincronização do progresso é manual e exige login. Para ativá-la, execute uma vez o arquivo `supabase/player_state.sql` no SQL Editor do Supabase. No perfil do SYSTEM, use **Enviar progresso local para a nuvem** para salvar uma cópia, ou **Restaurar progresso da nuvem neste aparelho** para recuperar a cópia em outro dispositivo. Restaurar baixa um backup JSON local antes de substituir os dados atuais. Enviar substitui a cópia remota após confirmação; escolha com cuidado se os aparelhos tiverem progresso diferente. A sincronização automática e a mesclagem de progresso ainda não estão implementadas.
