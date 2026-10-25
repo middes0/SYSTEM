@@ -36,5 +36,25 @@ $('#importInput').addEventListener('change',async e=>{const file=e.target.files?
 $('#resetBtn').addEventListener('click',async()=>{if(!confirm('Apagar todas as missões, XP e histórico deste aparelho? Exporte um backup antes, se precisar.'))return;state=fresh();await save();render();toast('Dados locais redefinidos.')});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').hidden=false});$('#installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').hidden=true});
 if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW não registrado',e)));
-(async()=>{state=await load();render();if(!state.missions.length){addMission('Estudar por 25 minutos','study','medium','',{source:'starter'});addMission('Organizar minhas prioridades','habit','easy','',{source:'starter'});record('Sistema iniciado','Bem-vindo ao SYSTEM.');await save();render()}})();
+function seedDefaultMissions(){
+if(state.defaultMissionsSeeded)return;
+state.missions=state.missions.filter(m=>m.source!=='starter');
+const templates=[
+['Caminhada rápida por 10 minutos','training','easy',10],
+['Alongamento por 5 minutos','training','easy',5],
+['Agachamentos — 10 repetições','training','easy',2],
+['Flexões — 5 repetições','training','easy',2],
+['Treino físico livre por 20 minutos','training','medium',20],
+['Estudar por 25 minutos','study','medium',25],
+['Revisar o que aprendi hoje por 10 minutos','study','easy',10],
+['Anotar os gastos de hoje','money','easy',0],
+['Organizar as prioridades do dia','habit','easy',0]
+];
+for(const [title,category,difficulty,durationMinutes] of templates){
+state.missions.push({id:id(),title,category,difficulty,xp:XP[difficulty],due:'',done:false,xpAwarded:false,startedAt:null,durationMinutes,createdAt:new Date().toISOString(),doneAt:null,source:'system-default'});
+}
+state.defaultMissionsSeeded=true;
+record('Missões iniciais carregadas','O sistema adicionou missões de estudo, treino, dinheiro e hábitos.');
+}
+(async()=>{state=await load();seedDefaultMissions();await save();render()})();
 })();
