@@ -38,25 +38,32 @@ $('#resetBtn').addEventListener('click',async()=>{if(!confirm('Apagar todas as m
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').hidden=false});$('#installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').hidden=true});
 if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW não registrado',e)));
 function seedDefaultMissions(){
-const templates=[
-['Caminhada rápida por 10 minutos','training','easy',10],
-['Alongamento por 5 minutos','training','easy',5],
-['Agachamentos — 10 repetições','training','easy',2],
-['Flexões — 5 repetições','training','easy',2],
-['Treino físico livre por 20 minutos','training','medium',20],
-['Estudar por 25 minutos','study','medium',25],
-['Revisar o que aprendi hoje por 10 minutos','study','easy',10],
-['Anotar os gastos de hoje','money','easy',0],
-['Organizar as prioridades do dia','habit','easy',0]
-];
-state.missions=state.missions.filter(m=>m.source!=='starter');
-const existing=new Set(state.missions.filter(m=>m.source==='system-default').map(m=>m.title));
-for(const [title,category,difficulty,durationMinutes] of templates){
-if(existing.has(title))continue;
-state.missions.push({id:id(),title,category,difficulty,xp:XP[difficulty],due:'',done:false,xpAwarded:false,startedAt:null,durationMinutes,createdAt:new Date().toISOString(),doneAt:null,source:'system-default'});
-}
-state.defaultMissionsSeeded=true;
-record('Missões iniciais verificadas','O sistema garantiu missões de estudo, treino, dinheiro e hábitos.');
+  // Não recria missões padrão em aparelhos que já têm dados. Isso preserva
+  // exclusões feitas pelo usuário e evita alterar o histórico ao abrir o app.
+  if (state.defaultMissionsSeeded || state.missions.length > 0) {
+    state.defaultMissionsSeeded = true;
+    return false;
+  }
+  const templates = [
+    ['Caminhada rápida por 10 minutos','training','easy',10],
+    ['Alongamento por 5 minutos','training','easy',5],
+    ['Agachamentos — 10 repetições','training','easy',2],
+    ['Flexões — 5 repetições','training','easy',2],
+    ['Treino físico livre por 20 minutos','training','medium',20],
+    ['Estudar por 25 minutos','study','medium',25],
+    ['Revisar o que aprendi hoje por 10 minutos','study','easy',10],
+    ['Anotar os gastos de hoje','money','easy',0],
+    ['Organizar as prioridades do dia','habit','easy',0]
+  ];
+  for (const [title,category,difficulty,durationMinutes] of templates) {
+    state.missions.push({
+      id:id(), title, category, difficulty, xp:XP[difficulty], due:'',
+      done:false, xpAwarded:false, startedAt:null, durationMinutes,
+      createdAt:new Date().toISOString(), doneAt:null, source:'system-default'
+    });
+  }
+  state.defaultMissionsSeeded = true;
+  return true;
 }
 (async()=>{state=await load();seedDefaultMissions();await save();render()})();
 })();
