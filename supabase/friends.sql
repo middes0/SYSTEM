@@ -1,5 +1,10 @@
 -- SYSTEM: funções seguras para busca de jogadores e amizades
 -- Execute depois do schema.sql inicial no Supabase SQL Editor.
+-- As operações de escrita passam pelas funções abaixo, para validar o destinatário.
+
+drop policy if exists "Send friend request" on public.system_friendships;
+drop policy if exists "Accept friendship" on public.system_friendships;
+drop policy if exists "Remove friendship" on public.system_friendships;
 
 create or replace function public.system_search_players(search_term text)
 returns table (
