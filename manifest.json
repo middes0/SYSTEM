@@ -1,0 +1,14 @@
+{
+  "id": "./",
+  "name": "SYSTEM — Personal Evolution",
+  "short_name": "SYSTEM",
+  "description": "Transforme objetivos reais em missões e evolução pessoal.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080910",
+  "theme_color": "#080910",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}
