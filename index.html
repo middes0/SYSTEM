@@ -36,6 +36,15 @@
 </div>
 <p id="accountStatus" class="account-status" role="status" aria-live="polite"></p>
 </section>
+<section id="friendsPanel" class="panel friends-panel">
+<div class="section-heading"><div><p class="eyebrow">REDE DE JOGADORES</p><h2>Amigos</h2></div><span class="account-mark">FR</span></div>
+<p class="muted friends-intro">Encontre jogadores pelo nome de usuário, envie solicitações e compare o nível quando a pessoa permitir compartilhar o progresso.</p>
+<form id="friendSearchForm" class="friend-search"><label for="friendSearchInput">Buscar jogador</label><div class="friend-search-row"><input id="friendSearchInput" minlength="3" maxlength="20" autocomplete="off" placeholder="Ex.: middes_01" required><button id="friendSearchButton" class="primary" type="submit">Buscar</button></div></form>
+<div id="friendSearchResults" class="friend-list"><p class="friend-empty">Entre na sua conta para procurar jogadores.</p></div>
+<div class="friends-divider"></div><p class="eyebrow">SOLICITAÇÕES</p><div id="friendRequestsList" class="friend-list"><p class="friend-empty">As solicitações aparecerão aqui.</p></div>
+<div class="friends-divider"></div><p class="eyebrow">MINHA LISTA</p><div id="friendList" class="friend-list"><p class="friend-empty">Suas amizades aparecerão aqui.</p></div>
+<p id="friendStatus" class="account-status" role="status" aria-live="polite"></p>
+</section>
 <nav class="tabs" aria-label="Navegação"><button class="tab active" data-tab="missions">▤ Missões</button><button class="tab" data-tab="status">◇ Status</button><button class="tab" data-tab="planner">✧ Administrador</button></nav>
 <section id="missionsView" class="view">
 <div class="section-heading"><div><p class="eyebrow">OBJETIVOS ATIVOS</p><h2>Missões do sistema</h2></div><button id="openMission" class="primary compact">＋ Nova missão</button></div>
@@ -54,5 +63,5 @@
 <footer><span>SYSTEM <span class="muted">v0.1.0</span></span><span class="footer-status"><span class="pulse"></span> CONTA ONLINE · MISSÕES LOCAIS</span></footer>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="./app.js" defer></script>\n<script type="module" src="./auth-ui.js"></script>
+<script src="./app.js" defer></script>\n<script type="module" src="./auth-ui.js"></script>\n<script type="module" src="./friends-ui.js"></script>
 </body></html>
