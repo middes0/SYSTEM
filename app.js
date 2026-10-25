@@ -65,6 +65,6 @@ function seedDefaultMissions(){
   state.defaultMissionsSeeded = true;
   return true;
 }
-window.SYSTEM_PROGRESS={getState:()=>JSON.parse(JSON.stringify(state||fresh())),replaceState:async(value)=>{if(!validState(value))throw Error('Progresso da nuvem inválido.');state=normalize(value);await save();render();}};
+window.SYSTEM_PROGRESS={getState:()=>{if(!state)throw Error('O progresso local ainda está carregando.');return JSON.parse(JSON.stringify(state));},replaceState:async(value)=>{if(!state)throw Error('O progresso local ainda está carregando.');if(!validState(value))throw Error('Progresso da nuvem inválido.');state=normalize(value);await save();render();}};
 (async()=>{state=await load();seedDefaultMissions();await save();render();window.dispatchEvent(new CustomEvent('system:progress-ready'))})();
 })();
