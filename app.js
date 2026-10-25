@@ -9,7 +9,7 @@ function dbRead(){return new Promise((resolve,reject)=>{const tx=db.transaction(
 function dbWrite(v){return new Promise((resolve,reject)=>{const tx=db.transaction('state','readwrite');tx.objectStore('state').put(v,KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
 async function load(){try{await openDB();const saved=await dbRead();if(validState(saved))return normalize(saved)}catch(e){console.warn('IndexedDB indisponível; usando localStorage.',e)}try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(validState(saved))return normalize(saved)}catch(e){console.warn('Falha ao ler armazenamento local.',e)}return fresh()}
 function normalize(v){const f=fresh();return {...f,...v,attributes:{...f.attributes,...v.attributes},missions:v.missions.filter(m=>m&&typeof m.id==='string'&&typeof m.title==='string').map(m=>({...m,xpAwarded:typeof m.xpAwarded==='boolean'?m.xpAwarded:Boolean(m.doneAt),durationMinutes:Number(m.durationMinutes)||0,startedAt:m.startedAt||null})),history:v.history.slice(-250),activeDays:Array.isArray(v.activeDays)?v.activeDays:[]}}
-let saveChain=Promise.resolve();function save(){const snapshot=JSON.parse(JSON.stringify(state));saveChain=saveChain.then(async()=>{try{if(db)await dbWrite(snapshot);else throw Error('IndexedDB indisponível')}catch(e){localStorage.setItem(KEY,JSON.stringify(snapshot))}}).catch(e=>{console.error(e);toast('Não foi possível salvar. Exporte um backup.');});return saveChain}
+let saveChain=Promise.resolve();async function persistSnapshot(snapshot){try{if(db)await dbWrite(snapshot);else throw Error('IndexedDB indisponível')}catch(dbError){try{localStorage.setItem(KEY,JSON.stringify(snapshot))}catch(storageError){throw Error('Falha ao salvar no IndexedDB e no armazenamento local.')}}}function save(){saveChain=saveChain.then(async()=>{const snapshot=JSON.parse(JSON.stringify(state));await persistSnapshot(snapshot)}).catch(e=>{console.error(e);toast('Não foi possível salvar. Exporte um backup.');});return saveChain}
 function id(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
 function dayKey(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function levelInfo(xp){let level=1,remaining=Math.max(0,xp);while(remaining>=level*100&&level<999){remaining-=level*100;level++}return{level,into:remaining,needed:level*100,rank:level>=50?'S':level>=30?'A':level>=20?'B':level>=12?'C':level>=6?'D':'E'}}
@@ -38,25 +38,33 @@ $('#resetBtn').addEventListener('click',async()=>{if(!confirm('Apagar todas as m
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').hidden=false});$('#installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').hidden=true});
 if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW não registrado',e)));
 function seedDefaultMissions(){
-const templates=[
-['Caminhada rápida por 10 minutos','training','easy',10],
-['Alongamento por 5 minutos','training','easy',5],
-['Agachamentos — 10 repetições','training','easy',2],
-['Flexões — 5 repetições','training','easy',2],
-['Treino físico livre por 20 minutos','training','medium',20],
-['Estudar por 25 minutos','study','medium',25],
-['Revisar o que aprendi hoje por 10 minutos','study','easy',10],
-['Anotar os gastos de hoje','money','easy',0],
-['Organizar as prioridades do dia','habit','easy',0]
-];
-state.missions=state.missions.filter(m=>m.source!=='starter');
-const existing=new Set(state.missions.filter(m=>m.source==='system-default').map(m=>m.title));
-for(const [title,category,difficulty,durationMinutes] of templates){
-if(existing.has(title))continue;
-state.missions.push({id:id(),title,category,difficulty,xp:XP[difficulty],due:'',done:false,xpAwarded:false,startedAt:null,durationMinutes,createdAt:new Date().toISOString(),doneAt:null,source:'system-default'});
+  // Não recria missões padrão em aparelhos que já têm dados. Isso preserva
+  // exclusões feitas pelo usuário e evita alterar o histórico ao abrir o app.
+  if (state.defaultMissionsSeeded || state.missions.length > 0) {
+    state.defaultMissionsSeeded = true;
+    return false;
+  }
+  const templates = [
+    ['Caminhada rápida por 10 minutos','training','easy',10],
+    ['Alongamento por 5 minutos','training','easy',5],
+    ['Agachamentos — 10 repetições','training','easy',2],
+    ['Flexões — 5 repetições','training','easy',2],
+    ['Treino físico livre por 20 minutos','training','medium',20],
+    ['Estudar por 25 minutos','study','medium',25],
+    ['Revisar o que aprendi hoje por 10 minutos','study','easy',10],
+    ['Anotar os gastos de hoje','money','easy',0],
+    ['Organizar as prioridades do dia','habit','easy',0]
+  ];
+  for (const [title,category,difficulty,durationMinutes] of templates) {
+    state.missions.push({
+      id:id(), title, category, difficulty, xp:XP[difficulty], due:'',
+      done:false, xpAwarded:false, startedAt:null, durationMinutes,
+      createdAt:new Date().toISOString(), doneAt:null, source:'system-default'
+    });
+  }
+  state.defaultMissionsSeeded = true;
+  return true;
 }
-state.defaultMissionsSeeded=true;
-record('Missões iniciais verificadas','O sistema garantiu missões de estudo, treino, dinheiro e hábitos.');
-}
-(async()=>{state=await load();seedDefaultMissions();await save();render()})();
+window.SYSTEM_PROGRESS={getState:()=>{if(!state)throw Error('O progresso local ainda está carregando.');return JSON.parse(JSON.stringify(state));},replaceState:async(value)=>{if(!state)throw Error('O progresso local ainda está carregando.');if(!validState(value))throw Error('Progresso da nuvem inválido.');const next=normalize(value);const snapshot=JSON.parse(JSON.stringify(next));const operation=saveChain.then(async()=>{await persistSnapshot(snapshot);state=next;render();});saveChain=operation.catch(e=>{console.error(e);toast('Não foi possível salvar. Os dados anteriores foram mantidos.');});await operation;}};
+(async()=>{state=await load();seedDefaultMissions();await save();render();window.dispatchEvent(new CustomEvent('system:progress-ready'))})();
 })();
