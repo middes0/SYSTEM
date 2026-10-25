@@ -1,0 +1,2 @@
+SYSTEM — teste de acionamento de deploy.
+Arquivo temporário criado em 25/10/2026 para verificar se o Cloudflare Pages detecta novos commits na branch main.
