@@ -16,6 +16,26 @@
 <div class="xp-meta"><span>EXPERIÊNCIA</span><span id="xpText">0 / 100 XP</span></div><div class="xp-track"><div id="xpBar"></div></div>
 <div class="stat-grid"><div class="stat"><span>MISSÕES</span><strong id="completedText">0</strong><small>concluídas</small></div><div class="stat"><span>SEQUÊNCIA</span><strong id="streakText">0</strong><small>dias ativos</small></div><div class="stat"><span>XP TOTAL</span><strong id="totalXpText">0</strong><small>acumulado</small></div></div>
 </section>
+<section id="accountPanel" class="panel account-panel" aria-labelledby="accountTitle">
+<div class="account-head"><div><p class="eyebrow">IDENTIDADE ONLINE</p><h2 id="accountTitle">Entrar no SYSTEM</h2></div><span class="account-mark">ID</span></div>
+<p class="muted account-intro">Crie uma conta para preparar seu perfil online. Suas missões locais continuam neste aparelho.</p>
+<div id="accountFormPanel">
+<form id="accountForm">
+<div id="accountDisplayWrap" hidden><label for="accountDisplayName">Nome de exibição</label><input id="accountDisplayName" maxlength="40" placeholder="Como quer aparecer"></div>
+<div id="accountUsernameWrap" hidden><label for="accountUsername">Nome de usuário</label><input id="accountUsername" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" placeholder="ex: middes_01"><small class="account-hint">3–20 caracteres: letras sem acento, números ou _.</small></div>
+<label for="accountEmail">E-mail</label><input id="accountEmail" type="email" autocomplete="email" required placeholder="voce@email.com">
+<label for="accountPassword">Senha</label><input id="accountPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo de 8 caracteres">
+<button id="accountSubmit" class="primary full" type="submit">Entrar</button>
+</form>
+<button id="accountMode" class="secondary full account-switch" type="button">Ainda não tenho conta</button>
+</div>
+<div id="signedPanel" hidden>
+<div class="account-player"><span class="account-avatar">S</span><div><strong id="accountPlayerText">Jogador</strong><small id="accountPlayerMeta">Perfil</small><small id="accountEmailText"></small></div></div>
+<p class="account-hint">A sessão fica salva neste navegador. O progresso das missões ainda é armazenado localmente.</p>
+<button id="accountLogout" class="secondary full" type="button" hidden>Sair da conta</button>
+</div>
+<p id="accountStatus" class="account-status" role="status" aria-live="polite"></p>
+</section>
 <nav class="tabs" aria-label="Navegação"><button class="tab active" data-tab="missions">▤ Missões</button><button class="tab" data-tab="status">◇ Status</button><button class="tab" data-tab="planner">✧ Administrador</button></nav>
 <section id="missionsView" class="view">
 <div class="section-heading"><div><p class="eyebrow">OBJETIVOS ATIVOS</p><h2>Missões do sistema</h2></div><button id="openMission" class="primary compact">＋ Nova missão</button></div>
@@ -34,5 +54,5 @@
 <footer><span>SYSTEM <span class="muted">v0.1.0</span></span><span class="footer-status"><span class="pulse"></span> DADOS LOCAIS</span></footer>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="./app.js" defer></script>
+<script src="./app.js" defer></script>\n<script type="module" src="./auth-ui.js"></script>
 </body></html>
