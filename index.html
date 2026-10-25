@@ -51,7 +51,8 @@
 </div>
 <div id="signedPanel" hidden>
 <div class="account-player"><span class="account-avatar">S</span><div><strong id="accountPlayerText">Jogador</strong><small id="accountPlayerMeta">Perfil</small><small id="accountEmailText"></small></div></div>
-<p class="account-hint">A sessão fica salva neste navegador. O progresso das missões ainda é armazenado localmente.</p>
+<p class="account-hint">A sessão fica salva neste navegador. Use os controles abaixo para enviar ou restaurar uma cópia do progresso.</p>
+<div class="sync-actions"><button id="syncUpload" class="primary full" type="button">Enviar progresso local para a nuvem</button><button id="syncRestore" class="secondary full" type="button">Restaurar progresso da nuvem neste aparelho</button><p id="syncStatus" class="account-status" role="status" aria-live="polite"></p></div>
 <button id="accountLogout" class="secondary full" type="button" hidden>Sair da conta</button>
 </div>
 <p id="accountStatus" class="account-status" role="status" aria-live="polite"></p>
@@ -90,4 +91,5 @@
 <script src="./app.js" defer></script>
 <script type="module" src="./auth-ui.js"></script>
 <script type="module" src="./friends-ui.js"></script>
+<script type="module" src="./progress-sync.js"></script>
 </body></html>
